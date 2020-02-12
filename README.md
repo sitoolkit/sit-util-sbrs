@@ -57,7 +57,7 @@ Add dependency of sit-util-sbrs-core.
   <dependency>
     <groupId>io.sitoolkit.util.sbrs</groupId>
     <artifactId>sit-util-sbrs-core</artifactId>
-    <version>0.8</version>
+    <version>0.9-SNAPSHOT</version>
   </dependency>
 ```
 
