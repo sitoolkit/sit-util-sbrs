@@ -10,7 +10,7 @@
     <antcall target="test" />
 
     <exec executable="${mvn.cmd}" failonerror="true">
-      <arg line="clean deploy -P db,ldap -Dmaven.test.skip=true" />
+      <arg line="clean deploy -P db,ldap,release" />
     </exec>
 
   </target>
@@ -19,11 +19,11 @@
   <target name="test">
 
     <exec executable="${mvn.cmd}" failonerror="true">
-      <arg line="clean test -P db" />
+      <arg line="clean test -P db,analyze" />
     </exec>
 
     <exec executable="${mvn.cmd}" failonerror="true">
-      <arg line="clean test -P ldap" />
+      <arg line="test -P ldap,analyze" />
     </exec>
 
   </target>
