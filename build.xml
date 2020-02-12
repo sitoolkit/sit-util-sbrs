@@ -4,6 +4,8 @@
     <os family="windows" />
   </condition>
 
+  <property name="version" value="0.8-SNAPSHOT" />
+
 
   <target name="deploy">
 
@@ -18,28 +20,30 @@
 
   <target name="test">
 
-    <exec executable="${mvn.cmd}" failonerror="true">
+    <exec executable="${mvn.cmd}">
       <arg line="clean test -P db,analyze" />
     </exec>
 
-    <exec executable="${mvn.cmd}" failonerror="true">
+    <exec executable="${mvn.cmd}">
       <arg line="test -P ldap,analyze" />
+    </exec>
+
+    <exec executable="${mvn.cmd}" failonerror="true">
+      <arg line="sonar:sonar" />
     </exec>
 
   </target>
 
 
+
   <target name="set-version">
 
-    <property name="version" value="0.8-SNAPSHOT"/>
 
     <exec executable="${mvn.cmd}" dir="${basedir}">
       <arg line="versions:set -DnewVersion=${version} -DgenerateBackupPoms=false" />
     </exec>
 
-    <replaceregexp file="${basedir}/README.md"
-                       match="sample-app/.*/sample-app-.*\.jar"
-                       replace="sample-app/${version}/sample-app-${version}.jar" />
+    <replaceregexp file="${basedir}/README.md" match="sample-app/.*/sample-app-.*\.jar" replace="sample-app/${version}/sample-app-${version}.jar" />
   </target>
-  
+
 </project>
