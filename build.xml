@@ -44,6 +44,9 @@
     </exec>
 
     <replaceregexp file="${basedir}/README.md" match="sample-app/.*/sample-app-.*\.jar" replace="sample-app/${version}/sample-app-${version}.jar" />
+
+    <replaceregexp file="${basedir}/README.md" match="version&gt;.*&lt;/version" replace="version&gt;${version}&lt;/version" />
+
   </target>
 
 </project>
