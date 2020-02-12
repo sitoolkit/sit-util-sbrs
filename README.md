@@ -9,7 +9,7 @@ You can run it with the following commands.
 
 ```sh
 # Download the sample REST application 
-curl https://repo.maven.apache.org/maven2/io/sitoolkit/util/sbrs/sample-app/0.8/sample-app-0.8.jar
+curl https://repo.maven.apache.org/maven2/io/sitoolkit/util/sbrs/sample-app/0.9-SNAPSHOT/sample-app-0.9-SNAPSHOT.jar
 
 # Run
 java -jar sample-app.jar
