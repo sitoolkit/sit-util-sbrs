@@ -62,16 +62,35 @@ Add dependency of sit-util-sbrs-core.
 ```
 
 
-#### Step 2: Add property
+#### Step 2: Add Property
 Add property specifying user registory type to application.properties
 
 ```properties
 sit.sbrs.registory-type=db
 ```
 
-#### Step 3: Implement Java Classes
+#### Step3: Add Configuration
 
-Create service class witch implements org.springframework.security.core.userdetails.UserDetailsService.
+Import SbrsConfiguration to your spring boot application.
+
+```java
+import io.sitoolkit.util.sbrs.SbrsConfiguration;
+
+@SpringBootApplication
+@Import(SbrsConfiguration.class)
+public class SampleApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(SampleApplication.class, args);
+  }
+}
+```
+
+
+
+#### Step 4: Implement Java Classes
+
+Create a service class which implements org.springframework.security.core.userdetails.UserDetailsService.
 The sample application uses SpringDataJPA but you can use any db access libraries. 
 
 * UserService
@@ -142,8 +161,7 @@ public class UserEntity {
 }
 ```
 
-Create service class witch implements org.springframework.security.core.userdetails.UserDetailsService.
-
+Create a class which implements io.sitoolkit.util.sbrs.TokenConverter.
 
 
 ```java
@@ -190,5 +208,35 @@ public class SampleController {
 
     return "user";
   }
+
+```
+
+Create a class which implements io.sitoolkit.util.sbrs.UrlAuthorizationConfigurer to define url patterns which need authentication and authorization.
+
+If you want to learn how to use "registory" (the argument of configure method),
+see [the original spring security guide](https://docs.spring.io/spring-security/site/docs/current/guides/html5/helloworld-boot.html#creating-your-spring-security-configuration)
+
+
+```java
+import io.sitoolkit.util.sbrs.UrlAuthorizationConfigurer;
+
+@Component
+public class SampleUrlAuthorizationConfigurer implements UrlAuthorizationConfigurer {
+
+  @Override
+  public ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry
+      configure(
+          ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry
+              registory) {
+
+    return registory
+        .antMatchers("/auth/**")
+        .permitAll()
+        .antMatchers("/admin/**")
+        .hasRole("ADMIN")
+        .anyRequest()
+        .authenticated();
+  }
+}
 
 ```

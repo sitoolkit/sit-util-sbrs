@@ -46,7 +46,6 @@
   </parent>
 
   <properties>
-    <impl>db</impl>
     <argLine>-Dspring.profiles.active=${impl}</argLine>
   </properties>
 
