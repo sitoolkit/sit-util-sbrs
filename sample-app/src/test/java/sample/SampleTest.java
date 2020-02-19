@@ -77,6 +77,15 @@ public class SampleTest {
     assertThat(userResponse.getStatusCode(), is(HttpStatus.OK));
   }
 
+  @SuppressWarnings({"rawtypes"})
+  @Test
+  public void testLoginFailure() throws Exception {
+    ResponseEntity<Map> loginResponse = doLogin("admin", "incorrectpassword");
+
+    assertThat(loginResponse.getStatusCode(), is(HttpStatus.OK));
+    assertThat(loginResponse.getBody().get("success"), is(false));
+  }
+
   @SuppressWarnings("rawtypes")
   ResponseEntity<Map> doLogin(String loginId, String password) throws IOException {
     return restTemplate.postForEntity(
