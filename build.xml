@@ -1,0 +1,45 @@
+<project xmlns:if="ant:if" xmlns:unless="ant:unless" name="sendatsu" basedir="." default="deploy">
+
+  <condition property="mvn.cmd" value="${basedir}\mvnw.cmd" else="${basedir}\mvnw">
+    <os family="windows" />
+  </condition>
+
+
+  <target name="deploy">
+
+    <antcall target="test" />
+
+    <exec executable="${mvn.cmd}" failonerror="true">
+      <arg line="clean deploy -P db,ldap -Dmaven.test.skip=true" />
+    </exec>
+
+  </target>
+
+
+  <target name="test">
+
+    <exec executable="${mvn.cmd}" failonerror="true">
+      <arg line="clean test -P db" />
+    </exec>
+
+    <exec executable="${mvn.cmd}" failonerror="true">
+      <arg line="clean test -P ldap" />
+    </exec>
+
+  </target>
+
+
+  <target name="set-version">
+
+    <property name="version" value="0.8-SNAPSHOT"/>
+
+    <exec executable="${mvn.cmd}" dir="${basedir}">
+      <arg line="versions:set -DnewVersion=${version} -DgenerateBackupPoms=false" />
+    </exec>
+
+    <replaceregexp file="${basedir}/README.md"
+                       match="sample-app/.*/sample-app-.*\.jar"
+                       replace="sample-app/${version}/sample-app-${version}.jar" />
+  </target>
+  
+</project>

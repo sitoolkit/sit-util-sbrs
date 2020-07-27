@@ -1,0 +1,55 @@
+dn: dc=sitoolkit,dc=io
+objectclass: top
+objectclass: domain
+objectclass: extensibleObject
+dc: sitoolkit
+
+dn: ou=groups,dc=sitoolkit,dc=io
+changetype: add
+objectclass: top
+objectclass: organizationalUnit
+ou: groups
+
+dn: ou=people,dc=sitoolkit,dc=io
+changetype: add
+objectclass: top
+objectclass: organizationalUnit
+ou: people
+
+dn: uid=admin,ou=people,dc=sitoolkit,dc=io
+changetype: add
+cn: Administrator
+uid: admin
+sn: Administrator
+givenName: One
+objectClass: inetOrgPerson
+objectClass: person
+objectClass: top
+userPassword: password
+
+dn: uid=user,ou=people,dc=sitoolkit,dc=io
+changetype: add
+cn: User
+uid: user
+sn: User
+givenName: One
+objectClass: inetOrgPerson
+objectClass: person
+objectClass: top
+userPassword: password
+
+dn: cn=admins,ou=groups,dc=sitoolkit,dc=io
+cn: admins
+ou: admin
+objectClass: top
+objectclass: groupOfUniqueNames
+uniqueMember: uid=admin,ou=people,dc=sitoolkit,dc=io
+
+dn: cn=users,ou=groups,dc=sitoolkit,dc=io
+cn: users
+ou: user
+objectClass: top
+objectclass: groupOfUniqueNames
+uniqueMember: uid=admin,ou=people,dc=sitoolkit,dc=io
+uniqueMember: uid=user,ou=people,dc=sitoolkit,dc=io
+
