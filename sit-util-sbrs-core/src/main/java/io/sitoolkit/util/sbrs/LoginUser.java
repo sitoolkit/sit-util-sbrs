@@ -1,27 +1,26 @@
-package sample.infrastructure.auth;
+package io.sitoolkit.util.sbrs;
 
 import java.util.List;
-
-import org.springframework.security.core.userdetails.User;
-
-import io.sitoolkit.util.sbrs.SpringSecurityUtils;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.userdetails.User;
 
-public class SampleUser extends User {
+@EqualsAndHashCode(callSuper = false)
+public class LoginUser extends User {
 
   /** */
   private static final long serialVersionUID = 1L;
 
   @Getter @Setter private String name;
 
-  public SampleUser(String loginId, String password, String name, String... roles) {
+  public LoginUser(String loginId, String password, String name, String... roles) {
     super(loginId, password, SpringSecurityUtils.toAuthrities(roles));
 
     this.name = name;
   }
 
-  public SampleUser(String loginId, String name, List<String> roles) {
+  public LoginUser(String loginId, String name, List<String> roles) {
     this(loginId, "dummy", name, roles.toArray(new String[roles.size()]));
   }
 
