@@ -1,7 +1,7 @@
 package sample.domain.user;
 
-import io.sitoolkit.util.sbrs.AccountRepositoryBase;
+import io.sitoolkit.util.sbrs.AccountRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends AccountRepositoryBase<UserEntity> {}
+public interface UserRepository extends AccountRepository<UserEntity> {}

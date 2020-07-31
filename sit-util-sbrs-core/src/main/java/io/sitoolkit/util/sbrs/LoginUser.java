@@ -1,22 +1,32 @@
 package io.sitoolkit.util.sbrs;
 
 import java.util.List;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.security.core.userdetails.User;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-@EqualsAndHashCode(callSuper = false)
-public class LoginUser extends User {
+@Data
+@NoArgsConstructor
+public class LoginUser implements UserDetails {
 
   /** */
   private static final long serialVersionUID = 1L;
 
-  @Getter @Setter private String name;
+  private String username;
+  private String password;
+  private List<GrantedAuthority> authorities;
+  private boolean accountNonExpired = true;
+  private boolean accountNonLocked = true;
+  private boolean credentialsNonExpired = true;
+  private boolean enabled = true;
+
+  private String name;
 
   public LoginUser(String loginId, String password, String name, String... roles) {
-    super(loginId, password, SpringSecurityUtils.toAuthrities(roles));
-
+    this.username = loginId;
+    this.password = password;
+    this.authorities = SpringSecurityUtils.toAuthrities(roles);
     this.name = name;
   }
 
