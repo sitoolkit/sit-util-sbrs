@@ -21,7 +21,7 @@ curl -X POST -H "Content-Type: application/json" -d "{\"loginId\":\"admin\", \"p
 The response body of POST includes a security token.
 
 ```json
-{ "loginId": "admin", "token": "xxxxxx" }
+{ "loginId": "admin", "token": "xxxxxx", "success": true }
 ```
 
 Copy the token value and request GET with it.
