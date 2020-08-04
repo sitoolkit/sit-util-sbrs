@@ -4,7 +4,7 @@
     <os family="windows" />
   </condition>
 
-  <property name="version" value="0.9-SNAPSHOT" />
+  <property name="version" value="1.0.0-SNAPSHOT" />
 
 
   <target name="deploy">
@@ -43,7 +43,7 @@
       <arg line="versions:set -DnewVersion=${version} -DgenerateBackupPoms=false" />
     </exec>
 
-    <replaceregexp file="${basedir}/README.md" match="sample-app/.*/sample-app-.*\.jar" replace="sample-app/${version}/sample-app-${version}.jar" />
+    <replaceregexp file="${basedir}/README.md" match="sample-app/.*/sample-app-.*\.jar -o" replace="sample-app/${version}/sample-app-${version}.jar -o" />
 
     <replaceregexp file="${basedir}/README.md" match="version&gt;.*&lt;/version" replace="version&gt;${version}&lt;/version" />
 

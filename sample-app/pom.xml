@@ -52,7 +52,7 @@
   <parent>
     <groupId>io.sitoolkit.util.sbrs</groupId>
     <artifactId>sit-util-sbrs</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
 
   <properties>
@@ -101,6 +101,10 @@
             <configuration>
               <resources>
                 <resource>
+                  <directory>src/main/resources</directory>
+                  <filtering>true</filtering>
+                </resource>
+                <resource>
                   <directory>src/${impl}/resources</directory>
                 </resource>
               </resources>
@@ -132,7 +136,12 @@
         <dependency>
           <groupId>com.unboundid</groupId>
           <artifactId>unboundid-ldapsdk</artifactId>
-          <scope>test</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>javax.xml.bind</groupId>
+          <artifactId>jaxb-api</artifactId>
+          <version>2.3.1</version>
         </dependency>
 
       </dependencies>
