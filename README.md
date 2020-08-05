@@ -33,11 +33,7 @@ curl -H "Authorization:Bearer xxxxxx" localhost:8080/auth/me
 Then you can get a response includes login user data.
 
 ```json
-{
-  "loginId": "admin",
-  "roles": ["ADMINS", "USERS"],
-  "ext": { "name": "Administrator" }
-}
+{ "loginId": "admin", "roles": ["ADMINS", "USERS"], "ext": { "name": "Administrator" } }
 ```
 
 This sample application is build from [this project](sample-app).
