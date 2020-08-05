@@ -86,105 +86,70 @@ public class SampleApplication {
 
 #### Step 4: Implement Java Classes
 
-Create a service class which implements org.springframework.security.core.userdetails.UserDetailsService.
-The sample application uses SpringDataJPA but you can use any db access libraries.
-
-- UserService
-
-```java
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-
-
-@Component
-public class UserService implements UserDetailsService {
-
-  @Autowired UserRepository repository;
-
-  @Autowired PasswordEncoder encoder;
-
-  @Override
-  public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
-
-    UserEntity entity =
-        repository.findById(loginId).orElseThrow(() -> new UsernameNotFoundException("Login Failed"));
-
-    SampleUser user =
-        new SampleUser(
-            entity.getId(),
-            entity.getPassword(),
-            entity.getName(),
-            SpringSecurityUtils.toAuthrities(entity.getRoles().split(",")));
-
-    return user;
-  }
-}
-
-```
-
 The sample app uses JPA as db access framework, Repository and Entity classes are as follows.
 
-- UserRepository
+- UserRepository  
+  Create a Repository class which implements io.sitoolkit.util.sbrs.AccountRepository.
 
 ```java
-import org.springframework.data.repository.CrudRepository;
+import io.sitoolkit.util.sbrs.AccountRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends CrudRepository<UserEntity, String> {}
+public interface UserRepository extends AccountRepository<UserEntity> {}
 ```
 
-- UserEntity
+- UserEntity  
+  Create a Entity class which implements io.sitoolkit.util.sbrs.AccountEntity.
 
 ```java
+import io.sitoolkit.util.sbrs.AccountEntity;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
-public class UserEntity {
+public class UserEntity implements AccountEntity {
 
+  // Member of AccountEntity's getter methods
   @Id private String id;
   private String password;
-  private String name;
   private String roles;
 
-  // getters and setters
+  // Your columns
+  private String name;
 }
 ```
 
 Create a class which implements io.sitoolkit.util.sbrs.TokenConverter.
 
 ```java
+import io.sitoolkit.util.sbrs.LoginUser;
 import io.sitoolkit.util.sbrs.TokenConverter;
 
 @Component
-public class TokenConverterDbImpl implements TokenConverter<SampleUser> {
+public class TokenConverterDbImpl implements TokenConverter<LoginUser<UserEntity>> {
 
   /**
    *  Convertion from UserDetailsService.loadUserByUsername result
    *  to "ext" property of /auth/me response body.
    **/
   @Override
-  public Map<String, String> toTokenExt(SampleUser principal) {
+  public Map<String, String> toTokenExt(LoginUser<UserEntity> principal) {
     Map<String, String> ext = new HashMap<>();
-
-    ext.put("name", principal.getName());
-
+    ext.put("name", principal.getEntity().getName());
     return ext;
   }
 
   /**
    * Conversion from the token data in request header
-   * to a object used in RestControllers and athrebackend java classes.
+   * to a object used in RestControllers and other backend java classes.
    **/
   @Override
-  public SampleUser toPrincipal(String loginId, List<String> roles, Map<String, String> ext) {
-    return new SampleUser(loginId, roles, ext.get("name"));
+  public LoginUser<UserEntity> toPrincipal(
+      String loginId, List<String> roles, Map<String, String> ext) {
+    UserEntity entity = new UserEntity();
+    entity.setName(ext.get("name"));
+    return new LoginUser<>(loginId, entity, roles);
   }
 }
 ```
