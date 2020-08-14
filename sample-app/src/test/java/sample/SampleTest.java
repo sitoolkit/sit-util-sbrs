@@ -4,12 +4,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 
+import com.fasterxml.jackson.core.JsonParser.Feature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,9 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import com.fasterxml.jackson.core.JsonParser.Feature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -45,23 +43,9 @@ public class SampleTest {
     assertThat(annonymousResponse.getStatusCode(), is(HttpStatus.FORBIDDEN));
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
   @Test
   public void testAuthentication() throws Exception {
-    ResponseEntity<Map> loginResponse = doLogin("admin", "password");
-
-    assertThat(loginResponse.getStatusCode(), is(HttpStatus.OK));
-
-    String token = loginResponse.getBody().get("token").toString();
-
-    Map me = doGet("/auth/me", token, Map.class).getBody();
-
-    assertThat(me.get("loginId"), is("admin"));
-    assertThat((List<String>) me.get("roles"), containsInAnyOrder("USERS", "ADMINS"));
-
-    Map ext = (Map) me.get("ext");
-
-    assertThat(ext.get("name"), is("Administrator"));
+    assertLogin("admin", "password", "Administrator", "USERS,ADMINS");
   }
 
   @Test
@@ -86,11 +70,60 @@ public class SampleTest {
     assertThat(loginResponse.getBody().get("success"), is(false));
   }
 
+  @SuppressWarnings({"rawtypes"})
+  @Test
+  public void testCreateUser() throws Exception {
+    String userid = "newuser";
+    String password = "password";
+    String name = "NewUser";
+    String roles = "USERS";
+
+    ResponseEntity<Map> createResponse = doCreate(userid, password, name, roles);
+    assertThat(createResponse.getStatusCode(), is(HttpStatus.OK));
+    assertThat(createResponse.getBody().get("success"), is(true));
+
+    assertLogin(userid, password, name, roles);
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  void assertLogin(String userid, String password, String name, String roles) throws Exception {
+    ResponseEntity<Map> loginResponse = doLogin(userid, password);
+    assertThat(loginResponse.getStatusCode(), is(HttpStatus.OK));
+
+    String token = loginResponse.getBody().get("token").toString();
+    Map me = doGet("/auth/me", token, Map.class).getBody();
+
+    assertThat(me.get("loginId"), is(userid));
+    assertThat((List<String>) me.get("roles"), containsInAnyOrder(roles.split(",")));
+
+    Map ext = (Map) me.get("ext");
+    assertThat(ext.get("name"), is(name));
+  }
+
   @SuppressWarnings("rawtypes")
   ResponseEntity<Map> doLogin(String loginId, String password) throws IOException {
     return restTemplate.postForEntity(
         "/auth/login",
         json("{'loginId':'" + loginId + "', 'password': '" + password + "'}"),
+        Map.class);
+  }
+
+  @SuppressWarnings("rawtypes")
+  ResponseEntity<Map> doCreate(String loginId, String password, String name, String roles)
+      throws IOException {
+    return restTemplate.postForEntity(
+        "/account/create",
+        json(
+            "{'loginId': '"
+                + loginId
+                + "', 'password': '"
+                + password
+                + "', 'ext': {"
+                + "'name': '"
+                + name
+                + "', 'roles': '"
+                + roles
+                + "' }}"),
         Map.class);
   }
 

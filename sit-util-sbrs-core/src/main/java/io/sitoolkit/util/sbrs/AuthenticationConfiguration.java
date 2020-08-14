@@ -1,5 +1,8 @@
 package io.sitoolkit.util.sbrs;
 
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class AuthenticationConfiguration {
 
   @Autowired private SbrsProperties securityProperties;
+
+  private UserDetailsService userDetailsService;
+  private DefaultAccountService defaultAccountService;
 
   @Bean
   public AuthencicationManagerConfigurer authencicationManagerConfigurer() {
@@ -36,14 +42,40 @@ public class AuthenticationConfiguration {
   @ConditionalOnMissingBean(UserDetailsService.class)
   public UserDetailsService userDetailsService() {
     String type = securityProperties.getRegistoryType().toLowerCase();
+    if (StringUtils.equals("db", type) && Objects.isNull(this.userDetailsService)) {
+      initializeUserDetailsService();
+    }
+    return this.userDetailsService;
+  }
+
+  @Bean
+  public DefaultAccountService defaultAccountService() {
+    if (Objects.isNull(this.defaultAccountService)) {
+      initializeUserDetailsService();
+    }
+    return this.defaultAccountService;
+  }
+
+  @Bean
+  public ModelMapper modelMapper() {
+    return new ModelMapper();
+  }
+
+  private void initializeUserDetailsService() {
+    String type = securityProperties.getRegistoryType().toLowerCase();
 
     switch (type) {
       case "db":
-        return new DefaultDbAccountService<>();
+        this.userDetailsService = new DefaultDbAccountService<>();
+        this.defaultAccountService = (DefaultAccountService) this.userDetailsService;
+        break;
       case "ldap":
-        return null;
+        this.userDetailsService = null;
+        this.defaultAccountService = new DefaultLdapAccountService();
+        break;
       default:
-        return new DefaultDbAccountService<>();
+        this.userDetailsService = new DefaultDbAccountService<>();
+        this.defaultAccountService = (DefaultAccountService) this.userDetailsService;
     }
   }
 }
