@@ -36,7 +36,7 @@ Then you can get a response includes login user data.
 { "loginId": "admin", "roles": ["ADMINS", "USERS"], "ext": { "name": "Administrator" } }
 ```
 
-You can create new account with the following commands.
+When your registry type is db, you can create new account with the following commands.
 
 ```sh
 # Create new account with HTTP POST
@@ -131,23 +131,6 @@ public class UserEntity implements AccountEntity {
 
   // Your columns
   private String name;
-}
-```
-
-- UserEntityProvider  
-  Create a EntityProvider class which implements io.sitoolkit.util.sbrs.AccountEntityProvider.
-
-```java
-import io.sitoolkit.util.sbrs.AccountEntityProvider;
-import org.springframework.stereotype.Component;
-
-@Component
-public class UserEntityProvider implements AccountEntityProvider<UserEntity> {
-  @Override
-  public Class<UserEntity> getType() {
-    // Return your Entity.class
-    return UserEntity.class;
-  }
 }
 ```
 

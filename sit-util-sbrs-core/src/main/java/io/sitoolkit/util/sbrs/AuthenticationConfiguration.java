@@ -17,7 +17,7 @@ public class AuthenticationConfiguration {
   @Autowired private SbrsProperties securityProperties;
 
   private UserDetailsService userDetailsService;
-  private DefaultAccountService defaultAccountService;
+  private AccountService accountService;
 
   @Bean
   public AuthencicationManagerConfigurer authencicationManagerConfigurer() {
@@ -49,11 +49,11 @@ public class AuthenticationConfiguration {
   }
 
   @Bean
-  public DefaultAccountService defaultAccountService() {
-    if (Objects.isNull(this.defaultAccountService)) {
+  public AccountService defaultAccountService() {
+    if (Objects.isNull(this.accountService)) {
       initializeUserDetailsService();
     }
-    return this.defaultAccountService;
+    return this.accountService;
   }
 
   @Bean
@@ -67,15 +67,15 @@ public class AuthenticationConfiguration {
     switch (type) {
       case "db":
         this.userDetailsService = new DefaultDbAccountService<>();
-        this.defaultAccountService = (DefaultAccountService) this.userDetailsService;
+        this.accountService = (AccountService) this.userDetailsService;
         break;
       case "ldap":
         this.userDetailsService = null;
-        this.defaultAccountService = new DefaultLdapAccountService();
+        this.accountService = new DefaultLdapAccountService();
         break;
       default:
         this.userDetailsService = new DefaultDbAccountService<>();
-        this.defaultAccountService = (DefaultAccountService) this.userDetailsService;
+        this.accountService = (AccountService) this.userDetailsService;
     }
   }
 }

@@ -6,11 +6,13 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.sitoolkit.util.sbrs.SbrsProperties;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +29,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class SampleTest {
 
   @Autowired TestRestTemplate restTemplate;
+
+  @Autowired SbrsProperties securityProperties;
 
   static ObjectMapper mapper;
 
@@ -79,10 +83,16 @@ public class SampleTest {
     String roles = "USERS";
 
     ResponseEntity<Map> createResponse = doCreate(userid, password, name, roles);
-    assertThat(createResponse.getStatusCode(), is(HttpStatus.OK));
-    assertThat(createResponse.getBody().get("success"), is(true));
 
-    assertLogin(userid, password, name, roles);
+    if (StringUtils.equals(securityProperties.getRegistoryType(), "ldap")) {
+      assertThat(createResponse.getStatusCode(), is(HttpStatus.NOT_FOUND));
+
+    } else {
+      assertThat(createResponse.getStatusCode(), is(HttpStatus.OK));
+      assertThat(createResponse.getBody().get("success"), is(true));
+
+      assertLogin(userid, password, name, roles);
+    }
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
