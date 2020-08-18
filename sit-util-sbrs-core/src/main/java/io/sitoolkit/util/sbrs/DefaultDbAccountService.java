@@ -1,15 +1,12 @@
 package io.sitoolkit.util.sbrs;
 
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ResolvableType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@Slf4j
 public class DefaultDbAccountService<T extends AccountEntity>
     implements UserDetailsService, AccountService {
 
@@ -37,21 +34,16 @@ public class DefaultDbAccountService<T extends AccountEntity>
       return false;
     }
 
-    try {
-      ResolvableType repositoryResolvableType =
-          ResolvableType.forClass(repository.getClass()).as(AccountRepository.class);
-      Class<?> entityClazz = repositoryResolvableType.getGeneric(0).resolve();
+    ext.put("id", loginId);
+    ext.put("password", encoder.encode(password));
 
-      ext.put("id", loginId);
-      ext.put("password", encoder.encode(password));
-
-      T account = modelMapper.map(ext, (Class<T>) entityClazz);
-      repository.save(account);
-      return true;
-
-    } catch (Exception e) {
-      log.error("exception occurred.", e);
-      return false;
-    }
+    T account =
+        modelMapper.map(
+            ext,
+            (Class<T>)
+                GenericClassUtil.getGenericClassFromImpl(
+                    repository.getClass(), AccountRepository.class, 0));
+    repository.save(account);
+    return true;
   }
 }

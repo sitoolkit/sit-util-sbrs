@@ -8,7 +8,7 @@ public class DefaultLdapAccountService implements AccountService {
 
   @Override
   public boolean create(String loginId, String password, Map<String, String> ext) {
-    throw new MethodNotSupportedExcpetion(getMethodName() + NOT_SUPPORTED);
+    throw new UnsupportedOperationException(getMethodName() + NOT_SUPPORTED);
   }
 
   private String getMethodName() {

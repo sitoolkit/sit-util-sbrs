@@ -1,5 +1,6 @@
 package io.sitoolkit.util.sbrs;
 
+import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,15 +16,19 @@ public class AccountController {
   @Autowired AccountService accountService;
 
   @PostMapping("/create")
-  public CreateResponseDto create(@RequestBody CreateRequestDto request) {
-    try {
-      boolean success =
-          accountService.create(request.getLoginId(), request.getPassword(), request.getExt());
-      return CreateResponseDto.builder().loginId(request.getLoginId()).success(success).build();
+  public CreateResponseDto create(
+      @RequestBody CreateRequestDto request, HttpServletResponse response) {
 
-    } catch (MethodNotSupportedExcpetion e) {
+    boolean success = false;
+    try {
+      success =
+          accountService.create(request.getLoginId(), request.getPassword(), request.getExt());
+
+    } catch (UnsupportedOperationException e) {
       log.warn("Method not supported.", e);
-      throw e;
+      response.setStatus(HttpServletResponse.SC_NOT_FOUND);
     }
+
+    return CreateResponseDto.builder().loginId(request.getLoginId()).success(success).build();
   }
 }
