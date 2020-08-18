@@ -71,7 +71,7 @@ public class AuthenticationConfiguration {
         break;
       case "ldap":
         this.userDetailsService = null;
-        this.accountService = new DefaultLdapAccountService();
+        this.accountService = null;
         break;
       default:
         this.userDetailsService = new DefaultDbAccountService<>();
