@@ -36,6 +36,20 @@ Then you can get a response includes login user data.
 { "loginId": "admin", "roles": ["ADMINS", "USERS"], "ext": { "name": "Administrator" } }
 ```
 
+When your registry type is db, you can create new account with the following commands.
+
+```sh
+# Create new account with HTTP POST
+curl -X POST -H "Content-Type: application/json" -d "{\"loginId\":\"newuser\", \"password\":\"password\", \"ext\": {\"name\": \"NewUser\", \"roles\": \"USERS\" }}" localhost:8080/account/create
+
+# Login with HTTP POST
+curl -X POST -H "Content-Type: application/json" -d "{\"loginId\":\"newuser\", \"password\":\"password\"}" localhost:8080/auth/login
+
+# Get new account's user data with HTTP GET
+# Replace "xxxxxx" with the security token of login response
+curl -H "Authorization:Bearer xxxxxx" localhost:8080/auth/me
+```
+
 This sample application is build from [this project](sample-app).
 
 ## How To Use In Your Project
@@ -188,7 +202,7 @@ public class SampleUrlAuthorizationConfigurer implements UrlAuthorizationConfigu
               registory) {
 
     return registory
-        .antMatchers("/auth/**")
+        .antMatchers("/auth/**", "/account/**")
         .permitAll()
         .antMatchers("/admin/**")
         .hasRole("ADMIN")
