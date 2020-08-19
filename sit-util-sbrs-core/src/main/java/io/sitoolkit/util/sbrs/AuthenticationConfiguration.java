@@ -49,7 +49,7 @@ public class AuthenticationConfiguration {
   }
 
   @Bean
-  public AccountService defaultAccountService() {
+  public AccountService accountService() {
     if (Objects.isNull(this.accountService)) {
       initializeUserDetailsService();
     }
