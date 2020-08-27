@@ -39,8 +39,17 @@ Then you can get a response includes login user data.
 When your registry type is db, you can create new account with the following commands.
 
 ```sh
+# Create user's activate code is sent email
+# Run FakeSMTP
+curl https://repo.maven.apache.org/maven2/com/github/tntim96/fakesmtp/2.0/fakesmtp-2.0.jar -o fakesmtp.jar
+java -jar fakesmtp.jar -s -p 1025
+
 # Create new account with HTTP POST
-curl -X POST -H "Content-Type: application/json" -d "{\"loginId\":\"newuser\", \"password\":\"password\", \"ext\": {\"name\": \"NewUser\", \"roles\": \"USERS\" }}" localhost:8080/account/create
+curl -X POST -H "Content-Type: application/json" -d "{\"loginId\":\"newuser\", \"notifyTo\":\"newuser@sample.com\", \"ext\":{}}" localhost:8080/account/create
+
+# Activate new account with HTTP POST
+# Replace "xxxxxx" with the activate code of mail recieved by FakeSMTP
+curl -X POST -H "Content-Type: application/json" -d "{\"loginId\":\"newuser\", \"activateCode\":\"xxxxxx\", \"password\":\"password\", \"ext\": {\"name\": \"NewUser\", \"roles\": \"USERS\" }}" localhost:8080/account/activate
 
 # Login with HTTP POST
 curl -X POST -H "Content-Type: application/json" -d "{\"loginId\":\"newuser\", \"password\":\"password\"}" localhost:8080/auth/login
@@ -80,6 +89,46 @@ Add property specifying user registory type to application.properties
 ```properties
 sit.sbrs.registory-type=db
 ```
+
+When send activate code by mail, add the follows.
+
+```properties
+# Definition to send mail
+sit.sbrs.notify-type=mail
+
+# Your SMTP server's information
+sit.sbrs.mail.smtpUser=
+sit.sbrs.mail.smtpPassword=
+sit.sbrs.mail.smtpHost=127.0.0.1
+sit.sbrs.mail.smtpPort=1025
+
+# Send mail information
+sit.sbrs.mail.activate.from=noreply@sample.com
+sit.sbrs.mail.activate.sub=Notify activate code
+sit.sbrs.mail.activate.htmlTemplate=template/activateNotification.html
+sit.sbrs.mail.activate.textTemplate=template/activateNotification.txt
+```
+
+Mail template is format of thymeleaf template.
+An example is as follows.
+
+```html
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <title>Account creation notification</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  </head>
+
+  <body>
+    Account "[[${loginId}]]" has created.<br />
+    Activate code is [[${activateCode}]].<br />
+  </body>
+</html>
+```
+
+When you want to replace other than "loginId" and "activateCode", specify it in "ext" of "/account/create" request parameter.
 
 #### Step3: Add Configuration
 
@@ -131,6 +180,33 @@ public class UserEntity implements AccountEntity {
 
   // Your columns
   private String name;
+}
+```
+
+- TmpUserRepository  
+  Create a Repository class which implements io.sitoolkit.util.sbrs.TmpUserRepository.
+
+```java
+import io.sitoolkit.util.sbrs.TmpAccountRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface TmpUserRepository extends TmpAccountRepository<TmpUserEntity> {}
+```
+
+- TmpUserAccount  
+  Create a Entity class which implements io.sitoolkit.util.sbrs.TmpAccountEntity.
+
+```java
+import io.sitoolkit.util.sbrs.TmpAccountEntity;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
+public class TmpUserEntity implements TmpAccountEntity {
+  // Member of TmpAccountEntity's getter methods
+  @Id private String id;
+  private String activateCode;
 }
 ```
 

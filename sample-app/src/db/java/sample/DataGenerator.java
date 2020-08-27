@@ -1,12 +1,10 @@
 package sample;
 
 import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
 import sample.domain.user.UserEntity;
 import sample.domain.user.UserRepository;
 

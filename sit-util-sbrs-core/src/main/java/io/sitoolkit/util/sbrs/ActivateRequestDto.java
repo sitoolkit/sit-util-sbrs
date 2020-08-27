@@ -10,8 +10,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateRequestDto {
+public class ActivateRequestDto {
   private String loginId;
-  private String notifyTo;
+  private String activateCode;
+  private String password;
   private Map<String, String> ext;
 }

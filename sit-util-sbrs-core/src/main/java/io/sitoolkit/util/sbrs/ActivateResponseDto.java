@@ -1,6 +1,5 @@
 package io.sitoolkit.util.sbrs;
 
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateRequestDto {
+public class ActivateResponseDto {
   private String loginId;
-  private String notifyTo;
-  private Map<String, String> ext;
+  private boolean success;
 }
