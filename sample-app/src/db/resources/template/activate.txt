@@ -1,0 +1,2 @@
+Account "[[${loginId}]]" has created.
+Activate code is [[${activateCode}]].

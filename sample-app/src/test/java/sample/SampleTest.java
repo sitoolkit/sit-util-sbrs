@@ -12,7 +12,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import javax.mail.BodyPart;
+import javax.mail.internet.MimeMultipart;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.subethamail.wiser.Wiser;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -34,10 +40,29 @@ public class SampleTest {
 
   static ObjectMapper mapper;
 
+  static Wiser wiser;
+
   @BeforeClass
-  public static void setup() {
+  public static void setupBeforeClass() {
     mapper = new ObjectMapper();
     mapper.configure(Feature.ALLOW_SINGLE_QUOTES, true);
+
+    wiser = new Wiser();
+    wiser.setPort(1025);
+    wiser.setHostname("localhost");
+    wiser.start();
+  }
+
+  @After
+  public void tearDown() {
+    if (Objects.nonNull(wiser.getMessages()) && !wiser.getMessages().isEmpty()) {
+      wiser.getMessages().clear();
+    }
+  }
+
+  @AfterClass
+  public static void tearDownAfterClass() {
+    wiser.stop();
   }
 
   @Test
@@ -65,24 +90,21 @@ public class SampleTest {
     assertThat(userResponse.getStatusCode(), is(HttpStatus.OK));
   }
 
-  @SuppressWarnings({"rawtypes"})
   @Test
   public void testLoginFailure() throws Exception {
-    ResponseEntity<Map> loginResponse = doLogin("admin", "incorrectpassword");
-
-    assertThat(loginResponse.getStatusCode(), is(HttpStatus.OK));
-    assertThat(loginResponse.getBody().get("success"), is(false));
+    assertLoginFailure("admin", "incorrectpassword");
   }
 
   @SuppressWarnings({"rawtypes"})
   @Test
   public void testCreateUser() throws Exception {
     String userid = "newuser";
+    String notifyTo = "newuser@sample.com";
     String password = "password";
     String name = "NewUser";
     String roles = "USERS";
 
-    ResponseEntity<Map> createResponse = doCreate(userid, password, name, roles);
+    ResponseEntity<Map> createResponse = doCreate(userid, notifyTo);
 
     if (StringUtils.equals(securityProperties.getRegistoryType(), "ldap")) {
       assertThat(createResponse.getStatusCode(), is(HttpStatus.NOT_FOUND));
@@ -91,8 +113,32 @@ public class SampleTest {
       assertThat(createResponse.getStatusCode(), is(HttpStatus.OK));
       assertThat(createResponse.getBody().get("success"), is(true));
 
+      assertLoginFailure(userid, password);
+
+      ResponseEntity<Map> activateResponse =
+          doActivate(userid, getActivateCodeFromMail(), password, name, roles);
+      assertThat(activateResponse.getStatusCode(), is(HttpStatus.OK));
+      assertThat(activateResponse.getBody().get("success"), is(true));
+
       assertLogin(userid, password, name, roles);
     }
+  }
+
+  private String getActivateCodeFromMail() throws Exception {
+    MimeMultipart multipart =
+        (MimeMultipart) wiser.getMessages().get(0).getMimeMessage().getContent();
+    String activateCode = "";
+    for (int cnt = 0; cnt < multipart.getCount(); cnt++) {
+      BodyPart bodyPart = multipart.getBodyPart(cnt);
+      if (bodyPart.isMimeType("text/plain")) {
+        activateCode =
+            StringUtils.substringBefore(
+                StringUtils.substringAfter(bodyPart.getContent().toString(), "Activate code is "),
+                ".");
+        break;
+      }
+    }
+    return activateCode;
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
@@ -111,6 +157,14 @@ public class SampleTest {
   }
 
   @SuppressWarnings("rawtypes")
+  void assertLoginFailure(String userId, String password) throws IOException {
+    ResponseEntity<Map> loginResponse = doLogin(userId, password);
+
+    assertThat(loginResponse.getStatusCode(), is(HttpStatus.OK));
+    assertThat(loginResponse.getBody().get("success"), is(false));
+  }
+
+  @SuppressWarnings("rawtypes")
   ResponseEntity<Map> doLogin(String loginId, String password) throws IOException {
     return restTemplate.postForEntity(
         "/auth/login",
@@ -119,13 +173,24 @@ public class SampleTest {
   }
 
   @SuppressWarnings("rawtypes")
-  ResponseEntity<Map> doCreate(String loginId, String password, String name, String roles)
-      throws IOException {
+  ResponseEntity<Map> doCreate(String loginId, String notifyTo) throws IOException {
     return restTemplate.postForEntity(
         "/account/create",
+        json("{'loginId': '" + loginId + "', 'notifyTo': '" + notifyTo + "' }"),
+        Map.class);
+  }
+
+  @SuppressWarnings("rawtypes")
+  ResponseEntity<Map> doActivate(
+      String loginId, String activateCode, String password, String name, String roles)
+      throws IOException {
+    return restTemplate.postForEntity(
+        "/account/activate",
         json(
             "{'loginId': '"
                 + loginId
+                + "', 'activateCode': '"
+                + activateCode
                 + "', 'password': '"
                 + password
                 + "', 'ext': {"
