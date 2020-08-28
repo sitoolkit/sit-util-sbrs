@@ -103,32 +103,20 @@ sit.sbrs.mail.smtpHost=127.0.0.1
 sit.sbrs.mail.smtpPort=1025
 
 # Send mail information
-sit.sbrs.mail.activate.from=noreply@sample.com
-sit.sbrs.mail.activate.sub=Notify activate code
-sit.sbrs.mail.activate.htmlTemplate=template/activateNotification.html
-sit.sbrs.mail.activate.textTemplate=template/activateNotification.txt
+sit.sbrs.mail.notification.from=noreply@sample.com
+sit.sbrs.mail.notification.activateSubject=Notify activate code
+
+# Not required, default is "[Classpath]/template".
+# When you want to change template path, specify this property.
+# e.g. specify "mailtemplate", store template in "[Classpath]/mailtemplate".
+sit.sbrs.mail.template=
 ```
 
-Mail template is format of thymeleaf template.
-An example is as follows.
+Mail template is format of thymeleaf template.  
+Text format of extension ".txt" is mandatory, HTML format of extention ".html" is optional.  
+See [sample's template](sample-app/src/db/resources/template) for more information.
 
-```html
-<!DOCTYPE html>
-
-<html lang="en">
-  <head>
-    <title>Account creation notification</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  </head>
-
-  <body>
-    Account "[[${loginId}]]" has created.<br />
-    Activate code is [[${activateCode}]].<br />
-  </body>
-</html>
-```
-
-When you want to replace other than "loginId" and "activateCode", specify it in "ext" of "/account/create" request parameter.
+When you want to replace other than sample's variables, specify it in "ext" of request parameter.
 
 #### Step3: Add Configuration
 

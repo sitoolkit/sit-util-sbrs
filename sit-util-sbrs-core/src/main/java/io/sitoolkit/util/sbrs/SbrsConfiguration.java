@@ -23,7 +23,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableConfigurationProperties({
   SbrsProperties.class,
   SbrsSmtpProperties.class,
-  SbrsNotifyActivateProperties.class
+  SbrsNotificationProperties.class
 })
 @ConditionalOnWebApplication
 public class SbrsConfiguration extends WebSecurityConfigurerAdapter {

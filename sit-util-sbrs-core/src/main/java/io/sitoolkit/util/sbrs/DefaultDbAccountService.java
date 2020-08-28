@@ -16,7 +16,7 @@ public class DefaultDbAccountService<T1 extends AccountEntity, T2 extends TmpAcc
 
   @Autowired TmpAccountRepository<T2> tmpAccountRepository;
 
-  @Autowired AcitvateCodeNotifier acitvateCodeNotifier;
+  @Autowired Notifier notifier;
 
   @Autowired PasswordEncoder encoder;
 
@@ -41,7 +41,7 @@ public class DefaultDbAccountService<T1 extends AccountEntity, T2 extends TmpAcc
 
     String activateCode = ActivateCodeUtil.generate();
     tmpAccountRepository.save(createTmpAccount(loginId, activateCode, ext));
-    acitvateCodeNotifier.notify(loginId, notifyTo, activateCode, ext);
+    notifier.activateCodeNotify(loginId, notifyTo, activateCode, ext);
     return true;
   }
 
