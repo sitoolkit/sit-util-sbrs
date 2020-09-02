@@ -5,5 +5,7 @@ public interface TmpAccountEntity {
 
   String getActivateCode();
 
+  String getMailAddress();
+
   void setActivateCode(String activateCode);
 }

@@ -1,6 +1,6 @@
 package sample.domain.user;
 
-import io.sitoolkit.util.sbrs.TmpAccountEntity;
+import io.sitoolkit.util.sbrs.ResetPasswordEntity;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import lombok.AllArgsConstructor;
@@ -13,11 +13,9 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @NoArgsConstructor
-public class TmpUserEntity implements TmpAccountEntity {
+public class ResetUserPasswordEntity implements ResetPasswordEntity {
 
   @Id private String id;
 
-  private String mailAddress;
-
-  private String activateCode;
+  private String accountId;
 }

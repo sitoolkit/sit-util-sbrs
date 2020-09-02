@@ -115,8 +115,12 @@ public class SampleTest {
 
       assertLoginFailure(userid, password);
 
+      String mailMessage = getTextpartFromMultipartMail();
+      String activateCode =
+          StringUtils.substringBefore(
+              StringUtils.substringAfter(mailMessage, "Activate code is "), ".");
       ResponseEntity<Map> activateResponse =
-          doActivate(userid, getActivateCodeFromMail(), password, name, roles);
+          doActivate(userid, activateCode, password, name, roles);
       assertThat(activateResponse.getStatusCode(), is(HttpStatus.OK));
       assertThat(activateResponse.getBody().get("success"), is(true));
 
@@ -124,21 +128,51 @@ public class SampleTest {
     }
   }
 
-  private String getActivateCodeFromMail() throws Exception {
+  @SuppressWarnings({"rawtypes"})
+  @Test
+  public void testChangePassword() throws Exception {
+    String userid = "changePw";
+    String mailAddress = "changePw@sample.com";
+    String oldPassword = "password";
+    String newPassword = "newPassword";
+    String name = "ChangePassword";
+    String roles = "USERS";
+
+    assertLogin(userid, oldPassword, name, roles);
+    ResponseEntity<Map> resetPasswrodResponse = doResetPassword(mailAddress);
+
+    if (StringUtils.equals(securityProperties.getRegistoryType(), "ldap")) {
+      assertThat(resetPasswrodResponse.getStatusCode(), is(HttpStatus.NOT_FOUND));
+
+    } else {
+      assertThat(resetPasswrodResponse.getStatusCode(), is(HttpStatus.OK));
+      assertThat(resetPasswrodResponse.getBody().get("success"), is(true));
+
+      String mailMessage = getTextpartFromMultipartMail();
+      String resetId = StringUtils.trim(StringUtils.substringAfterLast(mailMessage, "/"));
+
+      ResponseEntity<Map> changePasswordResponse = doChangePassword(resetId, newPassword);
+      assertThat(changePasswordResponse.getStatusCode(), is(HttpStatus.OK));
+      assertThat(changePasswordResponse.getBody().get("success"), is(true));
+
+      assertLoginFailure(userid, oldPassword);
+      assertLogin(userid, newPassword, name, roles);
+    }
+  }
+
+  private String getTextpartFromMultipartMail() throws Exception {
     MimeMultipart multipart =
         (MimeMultipart) wiser.getMessages().get(0).getMimeMessage().getContent();
-    String activateCode = "";
+
+    String textpart = "";
     for (int cnt = 0; cnt < multipart.getCount(); cnt++) {
       BodyPart bodyPart = multipart.getBodyPart(cnt);
       if (bodyPart.isMimeType("text/plain")) {
-        activateCode =
-            StringUtils.substringBefore(
-                StringUtils.substringAfter(bodyPart.getContent().toString(), "Activate code is "),
-                ".");
+        textpart = bodyPart.getContent().toString();
         break;
       }
     }
-    return activateCode;
+    return textpart;
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
@@ -200,6 +234,19 @@ public class SampleTest {
                 + roles
                 + "' }}"),
         Map.class);
+  }
+
+  @SuppressWarnings("rawtypes")
+  ResponseEntity<Map> doResetPassword(String mailAddress) throws IOException {
+    return restTemplate.postForEntity(
+        "/account/resetPassword", json("{'notifyTo': '" + mailAddress + "'}"), Map.class);
+  }
+
+  @SuppressWarnings("rawtypes")
+  ResponseEntity<Map> doChangePassword(String resetId, String newPassword) throws IOException {
+    String changePasswordUrl = "/account/changePassword/" + resetId;
+    return restTemplate.postForEntity(
+        changePasswordUrl, json("{'newPassword': '" + newPassword + "'}"), Map.class);
   }
 
   @SuppressWarnings("unchecked")

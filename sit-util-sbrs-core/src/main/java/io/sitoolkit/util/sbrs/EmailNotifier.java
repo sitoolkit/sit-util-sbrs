@@ -33,22 +33,37 @@ public class EmailNotifier implements Notifier {
     emailApi.send(emailObj);
   }
 
-  private EmailObject initEmail(List<String> to, String subject) {
-    EmailObject mailObj = new EmailObject();
-    mailObj.setFrom(notificationProperties.getFrom());
-    mailObj.setTo(to);
-    mailObj.setSubject(subject);
-    return mailObj;
+  @Override
+  public void resetPasswordNotify(
+      String loginId, String to, String changeUrl, Map<String, String> notifyParams) {
+    EmailObject emailObj =
+        initEmail(Arrays.asList(to), notificationProperties.getResetPasswordSubject());
+
+    Map<String, Object> variables = new HashMap<>();
+    variables.put("loginId", loginId);
+    variables.put("changeUrl", changeUrl);
+    if (Objects.nonNull(notifyParams)) variables.putAll(notifyParams);
+
+    setMessage(emailObj, "resetPassword", variables);
+    emailApi.send(emailObj);
   }
 
-  private void setMessage(EmailObject mailObj, String template, Map<String, Object> variables) {
+  private EmailObject initEmail(List<String> to, String subject) {
+    EmailObject emailObj = new EmailObject();
+    emailObj.setFrom(notificationProperties.getFrom());
+    emailObj.setTo(to);
+    emailObj.setSubject(subject);
+    return emailObj;
+  }
+
+  private void setMessage(EmailObject emailObj, String template, Map<String, Object> variables) {
 
     String textTemplate = templateDir() + "/" + template + ".txt";
-    mailObj.setTextMessage(EmailTemplateEngine.generate(textTemplate, variables));
+    emailObj.setTextMessage(EmailTemplateEngine.generate(textTemplate, variables));
 
     String htmlTemplate = templateDir() + "/" + template + ".html";
     if (Objects.nonNull(ClassLoader.getSystemResource(htmlTemplate))) {
-      mailObj.setHtmlMessage(EmailTemplateEngine.generate(htmlTemplate, variables));
+      emailObj.setHtmlMessage(EmailTemplateEngine.generate(htmlTemplate, variables));
     }
   }
 

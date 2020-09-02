@@ -2,6 +2,7 @@ package io.sitoolkit.util.sbrs;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +39,21 @@ public class AccountController {
                 request.getActivateCode(),
                 request.getPassword(),
                 request.getExt()))
+        .build();
+  }
+
+  @PostMapping("/resetPassword")
+  public ResetPasswordResponseDto resetPassword(@RequestBody ResetPasswordRequestDto request) {
+    return ResetPasswordResponseDto.builder()
+        .success(accountService.resetPassword(request.getNotifyTo(), request.getExt()))
+        .build();
+  }
+
+  @PostMapping("/changePassword/{resetId}")
+  public ChangePasswordResponseDto changePassword(
+      @PathVariable String resetId, @RequestBody ChangePasswordRequestDto request) {
+    return ChangePasswordResponseDto.builder()
+        .success(accountService.changePassword(resetId, request.getNewPassword()))
         .build();
   }
 }

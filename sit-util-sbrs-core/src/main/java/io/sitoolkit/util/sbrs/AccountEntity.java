@@ -5,5 +5,9 @@ public interface AccountEntity {
 
   String getPassword();
 
+  void setPassword(String password);
+
+  String getMailAddress();
+
   String getRoles();
 }
