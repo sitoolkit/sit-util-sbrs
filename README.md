@@ -36,14 +36,19 @@ Then you can get a response includes login user data.
 { "loginId": "admin", "roles": ["ADMINS", "USERS"], "ext": { "name": "Administrator" } }
 ```
 
-When your registry type is db, you can create new account with the following commands.
+When your registry type is db, you can create new account and change password.
+In sample-app, notification is sent by email.
+You will receive the mail with FakeSMTP.
 
 ```sh
-# Create user's activate code is sent email
 # Run FakeSMTP
 curl https://repo.maven.apache.org/maven2/com/github/tntim96/fakesmtp/2.0/fakesmtp-2.0.jar -o fakesmtp.jar
 java -jar fakesmtp.jar -s -p 1025
+```
 
+Create new account with the following commands.
+
+```sh
 # Create new account with HTTP POST
 curl -X POST -H "Content-Type: application/json" -d "{\"loginId\":\"newuser\", \"notifyTo\":\"newuser@sample.com\", \"ext\":{}}" localhost:8080/account/create
 
@@ -57,6 +62,20 @@ curl -X POST -H "Content-Type: application/json" -d "{\"loginId\":\"newuser\", \
 # Get new account's user data with HTTP GET
 # Replace "xxxxxx" with the security token of login response
 curl -H "Authorization:Bearer xxxxxx" localhost:8080/auth/me
+```
+
+Change password with the following commands.
+
+```sh
+# Reset password with HTTP POST
+curl -X POST -H "Content-Type: application/json" -d "{\"notifyTo\":\"user@sample.com\", \"ext\":{}}" localhost:8080/account/resetPassword
+
+# Activate new account with HTTP POST
+# Replace "xxxxxx" with the parameter at the end of URL in email received by FakeSMTP
+curl -X POST -H "Content-Type: application/json" -d "{\"newPassword\":\"new-password\"}" localhost:8080/account/changePassword/xxxxxxx
+
+# Login with new password
+curl -X POST -H "Content-Type: application/json" -d "{\"loginId\":\"newuser\", \"password\":\"new-password\"}" localhost:8080/auth/login
 ```
 
 This sample application is build from [this project](sample-app).
@@ -90,11 +109,15 @@ Add property specifying user registory type to application.properties
 sit.sbrs.registory-type=db
 ```
 
-When send activate code by mail, add the follows.
+When send notification by mail, add the follows.
 
 ```properties
 # Definition to send mail
 sit.sbrs.notify-type=mail
+
+# Password change url
+# Add ResetID to end of URL when notifying
+sit.sbrs.change-password-url=http://localhost:8080/account/changePassword
 
 # Your SMTP server's information
 sit.sbrs.mail.smtpUser=
@@ -105,6 +128,7 @@ sit.sbrs.mail.smtpPort=1025
 # Send mail information
 sit.sbrs.mail.notification.from=noreply@sample.com
 sit.sbrs.mail.notification.activateSubject=Notify activate code
+sit.sbrs.mail.notification.resetPasswordSubject=Reset password
 
 # Not required, default is "[Classpath]/template".
 # When you want to change template path, specify this property.
@@ -113,7 +137,7 @@ sit.sbrs.mail.template=
 ```
 
 Mail template is format of thymeleaf template.  
-Text format of extension ".txt" is mandatory, HTML format of extention ".html" is optional.  
+Text format of extension ".txt" is mandatory, HTML format of extension ".html" is optional.  
 See [sample's template](sample-app/src/db/resources/template) for more information.
 
 When you want to replace other than sample's variables, specify it in "ext" of request parameter.
@@ -164,7 +188,9 @@ public class UserEntity implements AccountEntity {
   // Member of AccountEntity's getter methods
   @Id private String id;
   private String password;
+  private String mailAddress;
   private String roles;
+  private String resetId;
 
   // Your columns
   private String name;
@@ -182,7 +208,7 @@ import org.springframework.stereotype.Repository;
 public interface TmpUserRepository extends TmpAccountRepository<TmpUserEntity> {}
 ```
 
-- TmpUserAccount  
+- TmpUserEntity
   Create a Entity class which implements io.sitoolkit.util.sbrs.TmpAccountEntity.
 
 ```java
@@ -195,6 +221,7 @@ public class TmpUserEntity implements TmpAccountEntity {
   // Member of TmpAccountEntity's getter methods
   @Id private String id;
   private String activateCode;
+  private String mailAddress;
 }
 ```
 

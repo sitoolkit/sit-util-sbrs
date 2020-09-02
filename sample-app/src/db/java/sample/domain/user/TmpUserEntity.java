@@ -17,5 +17,7 @@ public class TmpUserEntity implements TmpAccountEntity {
 
   @Id private String id;
 
+  private String mailAddress;
+
   private String activateCode;
 }

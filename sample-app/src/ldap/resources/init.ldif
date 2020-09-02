@@ -38,6 +38,17 @@ objectClass: person
 objectClass: top
 userPassword: password
 
+dn: uid=changePw,ou=people,dc=sitoolkit,dc=io
+changetype: add
+cn: ChangePassword
+uid: changePw
+sn: ChangePassword
+givenName: One
+objectClass: inetOrgPerson
+objectClass: person
+objectClass: top
+userPassword: password
+
 dn: cn=admins,ou=groups,dc=sitoolkit,dc=io
 cn: admins
 ou: admin
@@ -52,4 +63,4 @@ objectClass: top
 objectclass: groupOfUniqueNames
 uniqueMember: uid=admin,ou=people,dc=sitoolkit,dc=io
 uniqueMember: uid=user,ou=people,dc=sitoolkit,dc=io
-
+uniqueMember: uid=changePw,ou=people,dc=sitoolkit,dc=io

@@ -8,5 +8,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class SbrsNotificationProperties {
   private String from;
   private String activateSubject;
+  private String resetPasswordSubject;
   private String templateDir;
 }

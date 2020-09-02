@@ -24,10 +24,26 @@ public class DataGenerator {
             .id("admin")
             .password(password)
             .name("Administrator")
+            .mailAddress("admin@sample.com")
             .roles("ADMINS,USERS")
             .build());
 
     repo.save(
-        UserEntity.builder().id("user").password(password).name("User").roles("USER").build());
+        UserEntity.builder()
+            .id("user")
+            .password(password)
+            .name("User")
+            .mailAddress("user@sample.com")
+            .roles("USERS")
+            .build());
+
+    repo.save(
+        UserEntity.builder()
+            .id("changePw")
+            .password(password)
+            .name("ChangePassword")
+            .mailAddress("changePw@sample.com")
+            .roles("USERS")
+            .build());
   }
 }

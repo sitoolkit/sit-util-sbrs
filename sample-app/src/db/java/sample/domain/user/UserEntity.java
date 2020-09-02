@@ -21,5 +21,9 @@ public class UserEntity implements AccountEntity {
 
   private String name;
 
+  private String mailAddress;
+
   private String roles;
+
+  private String resetId;
 }
