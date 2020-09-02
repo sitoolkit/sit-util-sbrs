@@ -11,15 +11,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-public class DefaultDbAccountService<
-        T1 extends AccountEntity, T2 extends TmpAccountEntity, T3 extends ResetPasswordEntity>
+public class DefaultDbAccountService<T1 extends AccountEntity, T2 extends TmpAccountEntity>
     implements UserDetailsService, AccountService {
 
   @Autowired AccountRepository<T1> accountRepository;
 
   @Autowired TmpAccountRepository<T2> tmpAccountRepository;
-
-  @Autowired ResetPasswordRepository<T3> resetPasswordRepository;
 
   @Autowired Notifier notifier;
 
@@ -111,7 +108,6 @@ public class DefaultDbAccountService<
     return tmpAccount;
   }
 
-  @SuppressWarnings({"unchecked"})
   @Override
   public boolean resetPassword(String notifyTo, Map<String, String> ext) {
     T1 account = accountRepository.findByMailAddress(notifyTo).orElse(null);
@@ -120,23 +116,8 @@ public class DefaultDbAccountService<
     }
 
     String uuid = UUID.randomUUID().toString();
-    Map<String, String> param = new HashMap<>();
-    param.put("id", uuid);
-
-    T3 resetPassword = resetPasswordRepository.findByAccountId(account.getId()).orElse(null);
-    if (Objects.isNull(resetPassword)) {
-      param.put("accountId", account.getId());
-      resetPassword =
-          modelMapper.map(
-              param,
-              (Class<T3>)
-                  GenericClassUtil.getGenericClassFromImpl(
-                      resetPasswordRepository.getClass(), ResetPasswordRepository.class, 0));
-    } else {
-      modelMapper.map(param, resetPassword);
-    }
-
-    resetPasswordRepository.save(resetPassword);
+    account.setResetId(uuid);
+    accountRepository.save(account);
 
     String resetUrl = sbrsProperties.getChangePasswordUrl() + "/" + uuid;
     notifier.resetPasswordNotify(account.getId(), notifyTo, resetUrl, ext);
@@ -145,19 +126,14 @@ public class DefaultDbAccountService<
 
   @Override
   public boolean changePassword(String resetId, String newPassword) {
-    T3 changePassword = resetPasswordRepository.findById(resetId).orElse(null);
-    if (Objects.isNull(changePassword)) {
+    T1 account = accountRepository.findByResetId(resetId).orElse(null);
+    if (Objects.isNull(account)) {
       return false;
     }
 
-    T1 account =
-        accountRepository
-            .findById(changePassword.getAccountId())
-            .orElseThrow(() -> new UsernameNotFoundException("Account not found"));
-
     account.setPassword(encoder.encode(newPassword));
+    account.setResetId(null);
     accountRepository.save(account);
-    resetPasswordRepository.deleteById(resetId);
     return true;
   }
 }

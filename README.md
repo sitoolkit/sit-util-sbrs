@@ -115,7 +115,8 @@ When send notification by mail, add the follows.
 # Definition to send mail
 sit.sbrs.notify-type=mail
 
-#
+# Password change url
+# Add ResetID to end of URL when notifying
 sit.sbrs.change-password-url=http://localhost:8080/account/changePassword
 
 # Your SMTP server's information
@@ -189,6 +190,7 @@ public class UserEntity implements AccountEntity {
   private String password;
   private String mailAddress;
   private String roles;
+  private String resetId;
 
   // Your columns
   private String name;
@@ -220,33 +222,6 @@ public class TmpUserEntity implements TmpAccountEntity {
   @Id private String id;
   private String activateCode;
   private String mailAddress;
-}
-```
-
-- ResetUserPasswordRepository  
-  Create a Repository class which implements io.sitoolkit.util.sbrs.ResetPasswordRepository.
-
-```java
-import io.sitoolkit.util.sbrs.ResetPasswordRepository;
-import org.springframework.stereotype.Repository;
-
-@Repository
-public interface ResetUserPasswordRepository extends ResetPasswordRepository<ResetUserPasswordEntity> {}
-```
-
-- ResetUserPasswordEntity  
-  Create a Entity class which implements io.sitoolkit.util.sbrs.ResetPasswordEntity.
-
-```java
-import io.sitoolkit.util.sbrs.ResetPasswordEntity;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-
-@Entity
-public class ResetUserPasswordEntity implements ResetPasswordEntity {
-  // Member of ResetPasswordEntity's getter methods
-  @Id private String id;
-  private String accountId;
 }
 ```
 

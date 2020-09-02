@@ -10,4 +10,8 @@ public interface AccountEntity {
   String getMailAddress();
 
   String getRoles();
+
+  String getResetId();
+
+  void setResetId(String resetId);
 }
