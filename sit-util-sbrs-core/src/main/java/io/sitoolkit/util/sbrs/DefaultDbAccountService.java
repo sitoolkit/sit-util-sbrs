@@ -30,16 +30,16 @@ public class DefaultDbAccountService<T1 extends AccountEntity, T2 extends TmpAcc
   public LoginUser<T1> loadUserByUsername(String loginId) {
     T1 entity =
         accountRepository
-            .findById(loginId)
+            .findByLoginId(loginId)
             .orElseThrow(() -> new UsernameNotFoundException("Login Failed"));
 
     return new LoginUser<>(
-        entity.getId(), entity.getPassword(), entity, entity.getRoles().split(","));
+        entity.getLoginId(), entity.getPassword(), entity, entity.getRoles().split(","));
   }
 
   @Override
   public boolean create(String loginId, String notifyTo, Map<String, String> ext) {
-    if (accountRepository.findById(loginId).isPresent()) {
+    if (accountRepository.findByLoginId(loginId).isPresent()) {
       return false;
     }
 
@@ -62,14 +62,15 @@ public class DefaultDbAccountService<T1 extends AccountEntity, T2 extends TmpAcc
 
     T2 tmpAccount =
         tmpAccountRepository
-            .findById(loginId)
+            .findByLoginId(loginId)
             .orElseThrow(() -> new UsernameNotFoundException("Account Not Found"));
     if (!ActivateCodeUtil.confirm(activateCode, tmpAccount.getActivateCode())) {
       return false;
     }
 
     Map<String, String> param = new HashMap<>();
-    param.put("id", loginId);
+    param.put("id", UUID.randomUUID().toString());
+    param.put("loginId", loginId);
     param.put("password", encoder.encode(password));
     if (StringUtils.equals(sbrsProperties.getNotifyType(), "mail"))
       param.put("mailAddress", tmpAccount.getMailAddress());
@@ -82,19 +83,20 @@ public class DefaultDbAccountService<T1 extends AccountEntity, T2 extends TmpAcc
                     accountRepository.getClass(), AccountRepository.class, 0));
 
     accountRepository.save(account);
-    tmpAccountRepository.deleteById(loginId);
+    tmpAccountRepository.deleteById(tmpAccount.getId());
     return true;
   }
 
   @SuppressWarnings({"unchecked"})
   private T2 createTmpAccount(String loginId, String activateCode, Map<String, String> ext) {
-    T2 tmpAccount = tmpAccountRepository.findById(loginId).orElse(null);
+    T2 tmpAccount = tmpAccountRepository.findByLoginId(loginId).orElse(null);
     if (Objects.nonNull(tmpAccount)) {
       tmpAccount.setActivateCode(activateCode);
       modelMapper.map(ext, tmpAccount);
     } else {
       Map<String, String> param = new HashMap<>();
-      param.put("id", loginId);
+      param.put("id", UUID.randomUUID().toString());
+      param.put("loginId", loginId);
       param.put("activateCode", activateCode);
       if (Objects.nonNull(ext)) param.putAll(ext);
       tmpAccount =
