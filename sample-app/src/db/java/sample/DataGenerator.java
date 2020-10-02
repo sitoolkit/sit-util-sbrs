@@ -22,6 +22,7 @@ public class DataGenerator {
     repo.save(
         UserEntity.builder()
             .id("admin")
+            .loginId("admin@sample.com")
             .password(password)
             .name("Administrator")
             .mailAddress("admin@sample.com")
@@ -31,6 +32,7 @@ public class DataGenerator {
     repo.save(
         UserEntity.builder()
             .id("user")
+            .loginId("user@sample.com")
             .password(password)
             .name("User")
             .mailAddress("user@sample.com")
@@ -40,6 +42,7 @@ public class DataGenerator {
     repo.save(
         UserEntity.builder()
             .id("changePw")
+            .loginId("changePw@sample.com")
             .password(password)
             .name("ChangePassword")
             .mailAddress("changePw@sample.com")

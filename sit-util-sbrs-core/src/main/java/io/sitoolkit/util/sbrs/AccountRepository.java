@@ -4,7 +4,7 @@ import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 
 public interface AccountRepository<T extends AccountEntity> extends CrudRepository<T, String> {
-  Optional<T> findByMailAddress(String mailAddress);
+  Optional<T> findByLoginId(String loginId);
 
   Optional<T> findByResetId(String resetId);
 }

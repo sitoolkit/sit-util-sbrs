@@ -17,6 +17,8 @@ public class UserEntity implements AccountEntity {
 
   @Id private String id;
 
+  private String loginId;
+
   private String password;
 
   private String name;

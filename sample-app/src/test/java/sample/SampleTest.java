@@ -74,12 +74,12 @@ public class SampleTest {
 
   @Test
   public void testAuthentication() throws Exception {
-    assertLogin("admin", "password", "Administrator", "USERS,ADMINS");
+    assertLogin("admin@sample.com", "password", "Administrator", "USERS,ADMINS");
   }
 
   @Test
   public void testAuthorization() throws Exception {
-    String token = doLogin("user", "password").getBody().get("token").toString();
+    String token = doLogin("user@sample.com", "password").getBody().get("token").toString();
 
     ResponseEntity<String> adminResponse = doGet("/admin", token, String.class);
 
@@ -99,12 +99,13 @@ public class SampleTest {
   @Test
   public void testCreateUser() throws Exception {
     String userid = "newuser";
+    String loginId = "newuser@sample.com";
     String notifyTo = "newuser@sample.com";
     String password = "password";
     String name = "NewUser";
     String roles = "USERS";
 
-    ResponseEntity<Map> createResponse = doCreate(userid, notifyTo);
+    ResponseEntity<Map> createResponse = doCreate(loginId, notifyTo);
 
     if (StringUtils.equals(securityProperties.getRegistoryType(), "ldap")) {
       assertThat(createResponse.getStatusCode(), is(HttpStatus.NOT_FOUND));
@@ -120,11 +121,11 @@ public class SampleTest {
           StringUtils.substringBefore(
               StringUtils.substringAfter(mailMessage, "Activate code is "), ".");
       ResponseEntity<Map> activateResponse =
-          doActivate(userid, activateCode, password, name, roles);
+          doActivate(loginId, activateCode, password, name, roles);
       assertThat(activateResponse.getStatusCode(), is(HttpStatus.OK));
       assertThat(activateResponse.getBody().get("success"), is(true));
 
-      assertLogin(userid, password, name, roles);
+      assertLogin(loginId, password, name, roles);
     }
   }
 
@@ -132,13 +133,14 @@ public class SampleTest {
   @Test
   public void testChangePassword() throws Exception {
     String userid = "changePw";
+    String loginId = "changePw@sample.com";
     String mailAddress = "changePw@sample.com";
     String oldPassword = "password";
     String newPassword = "newPassword";
     String name = "ChangePassword";
     String roles = "USERS";
 
-    assertLogin(userid, oldPassword, name, roles);
+    assertLogin(loginId, oldPassword, name, roles);
     ResponseEntity<Map> resetPasswrodResponse = doResetPassword(mailAddress);
 
     if (StringUtils.equals(securityProperties.getRegistoryType(), "ldap")) {
@@ -156,7 +158,7 @@ public class SampleTest {
       assertThat(changePasswordResponse.getBody().get("success"), is(true));
 
       assertLoginFailure(userid, oldPassword);
-      assertLogin(userid, newPassword, name, roles);
+      assertLogin(loginId, newPassword, name, roles);
     }
   }
 
@@ -176,14 +178,14 @@ public class SampleTest {
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  void assertLogin(String userid, String password, String name, String roles) throws Exception {
-    ResponseEntity<Map> loginResponse = doLogin(userid, password);
+  void assertLogin(String loginId, String password, String name, String roles) throws Exception {
+    ResponseEntity<Map> loginResponse = doLogin(loginId, password);
     assertThat(loginResponse.getStatusCode(), is(HttpStatus.OK));
 
     String token = loginResponse.getBody().get("token").toString();
     Map me = doGet("/auth/me", token, Map.class).getBody();
 
-    assertThat(me.get("loginId"), is(userid));
+    assertThat(me.get("loginId"), is(loginId));
     assertThat((List<String>) me.get("roles"), containsInAnyOrder(roles.split(",")));
 
     Map ext = (Map) me.get("ext");
