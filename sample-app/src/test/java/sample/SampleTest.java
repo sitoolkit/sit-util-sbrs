@@ -74,12 +74,12 @@ public class SampleTest {
 
   @Test
   public void testAuthentication() throws Exception {
-    assertLogin("admin@sample.com", "password", "Administrator", "USERS,ADMINS");
+    assertLogin("admin", "password", "Administrator", "USERS,ADMINS");
   }
 
   @Test
   public void testAuthorization() throws Exception {
-    String token = doLogin("user@sample.com", "password").getBody().get("token").toString();
+    String token = doLogin("user", "password").getBody().get("token").toString();
 
     ResponseEntity<String> adminResponse = doGet("/admin", token, String.class);
 
@@ -98,8 +98,7 @@ public class SampleTest {
   @SuppressWarnings({"rawtypes"})
   @Test
   public void testCreateUser() throws Exception {
-    String userid = "newuser";
-    String loginId = "newuser@sample.com";
+    String loginId = "newuser";
     String notifyTo = "newuser@sample.com";
     String password = "password";
     String name = "NewUser";
@@ -114,7 +113,7 @@ public class SampleTest {
       assertThat(createResponse.getStatusCode(), is(HttpStatus.OK));
       assertThat(createResponse.getBody().get("success"), is(true));
 
-      assertLoginFailure(userid, password);
+      assertLoginFailure(loginId, password);
 
       String mailMessage = getTextpartFromMultipartMail();
       String activateCode =
@@ -132,8 +131,7 @@ public class SampleTest {
   @SuppressWarnings({"rawtypes"})
   @Test
   public void testChangePassword() throws Exception {
-    String userid = "changePw";
-    String loginId = "changePw@sample.com";
+    String loginId = "changePw";
     String mailAddress = "changePw@sample.com";
     String oldPassword = "password";
     String newPassword = "newPassword";
@@ -157,7 +155,7 @@ public class SampleTest {
       assertThat(changePasswordResponse.getStatusCode(), is(HttpStatus.OK));
       assertThat(changePasswordResponse.getBody().get("success"), is(true));
 
-      assertLoginFailure(userid, oldPassword);
+      assertLoginFailure(loginId, oldPassword);
       assertLogin(loginId, newPassword, name, roles);
     }
   }

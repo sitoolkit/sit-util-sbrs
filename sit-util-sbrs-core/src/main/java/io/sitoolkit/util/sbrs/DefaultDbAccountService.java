@@ -112,7 +112,7 @@ public class DefaultDbAccountService<T1 extends AccountEntity, T2 extends TmpAcc
 
   @Override
   public boolean resetPassword(String notifyTo, Map<String, String> ext) {
-    T1 account = accountRepository.findByLoginId(notifyTo).orElse(null);
+    T1 account = accountRepository.findByMailAddress(notifyTo).orElse(null);
     if (Objects.isNull(account)) {
       return false;
     }

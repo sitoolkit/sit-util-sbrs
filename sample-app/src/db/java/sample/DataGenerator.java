@@ -1,5 +1,6 @@
 package sample;
 
+import java.util.UUID;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,8 +22,8 @@ public class DataGenerator {
     String password = encoder.encode("password");
     repo.save(
         UserEntity.builder()
-            .id("admin")
-            .loginId("admin@sample.com")
+            .id(UUID.randomUUID().toString())
+            .loginId("admin")
             .password(password)
             .name("Administrator")
             .mailAddress("admin@sample.com")
@@ -31,8 +32,8 @@ public class DataGenerator {
 
     repo.save(
         UserEntity.builder()
-            .id("user")
-            .loginId("user@sample.com")
+            .id(UUID.randomUUID().toString())
+            .loginId("user")
             .password(password)
             .name("User")
             .mailAddress("user@sample.com")
@@ -41,8 +42,8 @@ public class DataGenerator {
 
     repo.save(
         UserEntity.builder()
-            .id("changePw")
-            .loginId("changePw@sample.com")
+            .id(UUID.randomUUID().toString())
+            .loginId("changePw")
             .password(password)
             .name("ChangePassword")
             .mailAddress("changePw@sample.com")
