@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmailNotifier implements Notifier {
 
-  @Autowired EmailApi emailApi;
+  @Autowired EmailApi<?> emailApi;
 
   @Autowired SbrsNotificationProperties notificationProperties;
 
