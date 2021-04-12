@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class EmailApi<T extends EmailEntity> {
-  
+
   @Autowired SbrsSmtpProperties smtpProperties;
   @Autowired EmailRepository<T> emailRepository;
   @Autowired ModelMapper modelMapper;
@@ -35,13 +35,7 @@ public class EmailApi<T extends EmailEntity> {
   public void send(EmailObject mailObj) {
 
     T emailEntity = createEmailEntity(mailObj);
-    emailRepository.save(emailEntity);
-    emailEntity = emailRepository.findById(emailEntity.getId()).orElse(null);
-
-    if (emailEntity == null) {
-      log.error("Not found mail from database.");
-      return;
-    } 
+    emailEntity = emailRepository.save(emailEntity);
 
     try {
       Email email = initEmail(mailObj);
