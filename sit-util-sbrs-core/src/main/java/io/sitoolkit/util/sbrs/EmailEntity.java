@@ -4,13 +4,19 @@ public interface EmailEntity {
 
   String getId();
 
+  String getFrom();
+
   String getTo();
 
   String getSubject();
 
-  String getMessage();
+  String getTextMessage();
+
+  String getHtmlMessage();
+
+  String getMimeType();
 
   String getSendStatus();
-  
+
   void setSendStatus(String sendStatus);
 }

@@ -248,9 +248,13 @@ import javax.persistence.Id;
 public class EmailControlEntity implements EmailEntity {
   // Member of EmailEntity's getter methods
   @Id private String id;
+  // ※Depending on the RDB used, escaping of 'FROM' and 'TO' columns may be required.
+  private String from;
   private String to;
   private String subject;
-  private String message;
+  private String textMessage;
+  private String htmlMessage;
+  private String mimeType;
   private String sendStatus;
 ```
 

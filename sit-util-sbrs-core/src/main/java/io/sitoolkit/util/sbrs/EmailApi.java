@@ -12,6 +12,7 @@ import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -31,18 +32,24 @@ public class EmailApi<T extends EmailEntity> {
     header.put("Content-Transfer-Encoding", "base64");
   }
 
-  @Async
-  public void send(EmailObject mailObj) {
+  public T saveEmail(EmailObject mailObj) {
+    return emailRepository.save(createEmailEntity(mailObj));
+  }
 
-    T emailEntity = createEmailEntity(mailObj);
-    emailEntity = emailRepository.save(emailEntity);
+  @Async
+  public void send(String emailId) {
+    T emailEntity = emailRepository.findById(emailId).orElse(null);
+    if (null == emailEntity) {
+      log.error("Cannot find email from database.  id: " + emailId);
+      throw new IllegalArgumentException("The specified emailId does not exist in the database.");
+    }
 
     try {
-      Email email = initEmail(mailObj);
+      Email email = initEmail(emailEntity);
       email.send();
-      emailEntity.setSendStatus("1");
+      emailEntity.setSendStatus(EmailSendStatus.SENT.getValue());
     } catch (EmailException e) {
-      emailEntity.setSendStatus("2");
+      emailEntity.setSendStatus(EmailSendStatus.FAILURE.getValue());
       log.error("Send mail failure. id: " + emailEntity.getId(), e);
       throw new IllegalArgumentException(e);
     } finally {
@@ -50,19 +57,19 @@ public class EmailApi<T extends EmailEntity> {
     }
   }
 
-  private Email initEmail(EmailObject mailObj) throws EmailException {
+  private Email initEmail(T emailEntity) throws EmailException {
     Email mail;
-    if (StringUtils.isEmpty(mailObj.getHtmlMessage())) {
+    if (MediaType.TEXT_PLAIN_VALUE.equals(emailEntity.getMimeType())) {
       mail = new SimpleEmail();
-      mail.setMsg(mailObj.getTextMessage());
+      mail.setMsg(emailEntity.getTextMessage());
     } else {
       mail = new HtmlEmail();
-      ((HtmlEmail) mail).setHtmlMsg(mailObj.getHtmlMessage());
-      ((HtmlEmail) mail).setTextMsg(mailObj.getTextMessage());
+      ((HtmlEmail) mail).setHtmlMsg(emailEntity.getHtmlMessage());
+      ((HtmlEmail) mail).setTextMsg(emailEntity.getTextMessage());
     }
 
     setConnectionParams(mail);
-    setSendParms(mail, mailObj);
+    setSendParms(mail, emailEntity);
     return mail;
   }
 
@@ -76,12 +83,12 @@ public class EmailApi<T extends EmailEntity> {
     }
   }
 
-  private void setSendParms(Email email, EmailObject mailObj) throws EmailException {
+  private void setSendParms(Email email, T emailEntity) throws EmailException {
     email.setCharset("UTF-8");
     email.setHeaders(header);
-    email.setFrom(mailObj.getFrom());
-    email.addTo(mailObj.getTo().toArray(new String[mailObj.getTo().size()]));
-    email.setSubject(mailObj.getSubject());
+    email.setFrom(emailEntity.getFrom());
+    email.addTo(emailEntity.getTo().split(","));
+    email.setSubject(emailEntity.getSubject());
   }
 
   private boolean needAuth() {
@@ -94,14 +101,16 @@ public class EmailApi<T extends EmailEntity> {
   }
 
   @SuppressWarnings({ "unchecked" })
-  private T createEmailEntity(EmailObject emailObject) {
-
+  private T createEmailEntity(EmailObject mailObj) {
     Map<String, String> param = new HashMap<>();
     param.put("id", UUID.randomUUID().toString());
-    param.put("to", String.join(",", emailObject.getTo()));
-    param.put("subject", emailObject.getSubject());
-    param.put("message", emailObject.getTextMessage());
-    param.put("sendStatus", "0");
+    param.put("from" , mailObj.getFrom());
+    param.put("to", String.join(",", mailObj.getTo()));
+    param.put("subject", mailObj.getSubject());
+    param.put("textMessage", mailObj.getTextMessage());
+    param.put("htmlMessage", mailObj.getHtmlMessage());
+    param.put("mimeType" , mailObj.getMimeType());
+    param.put("sendStatus", EmailSendStatus.UNSENT.getValue());
 
     return modelMapper.map(param,
         (Class<T>) GenericClassUtil.getGenericClassFromImpl(emailRepository.getClass(), EmailRepository.class, 0));
