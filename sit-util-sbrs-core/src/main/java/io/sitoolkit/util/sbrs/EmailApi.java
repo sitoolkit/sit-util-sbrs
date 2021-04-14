@@ -10,6 +10,7 @@ import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.commons.mail.SimpleEmail;
+import org.awaitility.Awaitility;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -37,12 +38,10 @@ public class EmailApi<T extends EmailEntity> {
   }
 
   @Async
+  @SuppressWarnings({ "squid:S3655" })
   public void send(String emailId) {
-    T emailEntity = emailRepository.findById(emailId).orElse(null);
-    if (null == emailEntity) {
-      log.error("Cannot find email from database.  id: " + emailId);
-      throw new IllegalArgumentException("The specified emailId does not exist in the database.");
-    }
+    Awaitility.await().until(() -> emailRepository.findById(emailId).isPresent());
+    T emailEntity = emailRepository.findById(emailId).get();
 
     try {
       Email email = initEmail(emailEntity);
