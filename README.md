@@ -225,6 +225,39 @@ public class TmpUserEntity implements TmpAccountEntity {
 }
 ```
 
+- EmailControlRepository  
+  Create a Repository class which implements io.sitoolkit.util.sbrs.EmailRepository.
+
+```java
+import io.sitoolkit.util.sbrs.EmailRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface EmailControlRepository extends EmailRepository<EmailControlEntity> {}
+```
+
+- EmailControlEntity
+  Create a Entity class which implements io.sitoolkit.util.sbrs.EmailEntity.
+
+```java
+import io.sitoolkit.util.sbrs.EmailEntity;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
+public class EmailControlEntity implements EmailEntity {
+  // Member of EmailEntity's getter methods
+  @Id private String id;
+  // ※Depending on the RDB used, escaping of 'FROM' and 'TO' columns may be required.
+  private String from;
+  private String to;
+  private String subject;
+  private String textMessage;
+  private String htmlMessage;
+  private String mimeType;
+  private String sendStatus;
+```
+
 Create a class which implements io.sitoolkit.util.sbrs.TokenConverter.
 
 ```java

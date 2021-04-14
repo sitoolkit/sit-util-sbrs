@@ -5,16 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 @ConditionalOnProperty(prefix = "sit.sbrs", name = "notify-type", havingValue = "mail")
 @Component
 public class EmailNotifier implements Notifier {
 
-  @Autowired EmailApi emailApi;
+  @Autowired EmailApi<?> emailApi;
 
   @Autowired SbrsNotificationProperties notificationProperties;
 
@@ -30,7 +32,9 @@ public class EmailNotifier implements Notifier {
     if (Objects.nonNull(notifyParams)) variables.putAll(notifyParams);
 
     setMessage(emailObj, "activate", variables);
-    emailApi.send(emailObj);
+
+    String emailId = emailApi.saveEmail(emailObj).getId();
+    emailApi.send(emailId);
   }
 
   @Override
@@ -45,7 +49,9 @@ public class EmailNotifier implements Notifier {
     if (Objects.nonNull(notifyParams)) variables.putAll(notifyParams);
 
     setMessage(emailObj, "resetPassword", variables);
-    emailApi.send(emailObj);
+
+    String emailId = emailApi.saveEmail(emailObj).getId();
+    emailApi.send(emailId);
   }
 
   private EmailObject initEmail(List<String> to, String subject) {
@@ -60,10 +66,12 @@ public class EmailNotifier implements Notifier {
 
     String textTemplate = templateDir() + "/" + template + ".txt";
     emailObj.setTextMessage(EmailTemplateEngine.generate(textTemplate, variables));
-
+    emailObj.setMimeType(MediaType.TEXT_PLAIN_VALUE);
+    
     String htmlTemplate = templateDir() + "/" + template + ".html";
     if (Objects.nonNull(ClassLoader.getSystemResource(htmlTemplate))) {
       emailObj.setHtmlMessage(EmailTemplateEngine.generate(htmlTemplate, variables));
+      emailObj.setMimeType(MediaType.TEXT_HTML_VALUE);
     }
   }
 
