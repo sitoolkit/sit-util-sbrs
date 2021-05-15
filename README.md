@@ -9,7 +9,7 @@ You can run it with the following commands.
 
 ```sh
 # Download the sample REST application
-curl https://repo.maven.apache.org/maven2/io/sitoolkit/util/sbrs/sample-app/1.0.0-SNAPSHOT/sample-app-1.0.0-SNAPSHOT.jar -o sample-app.jar
+curl https://repo.maven.apache.org/maven2/io/sitoolkit/util/sbrs/sample-app/1.0.0/sample-app-1.0.0.jar -o sample-app.jar
 
 # Run
 java -jar sample-app.jar
@@ -97,7 +97,7 @@ Add dependency of sit-util-sbrs-core.
   <dependency>
     <groupId>io.sitoolkit.util.sbrs</groupId>
     <artifactId>sit-util-sbrs-core</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </dependency>
 ```
 
