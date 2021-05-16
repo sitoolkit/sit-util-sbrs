@@ -11,6 +11,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-email</artifactId>
+      <version>1.5</version>
+    </dependency>
+
+    <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt</artifactId>
       <version>0.9.1</version>
@@ -48,9 +54,26 @@
     </dependency>
 
     <dependency>
+      <groupId>org.thymeleaf</groupId>
+      <artifactId>thymeleaf</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.modelmapper</groupId>
+      <artifactId>modelmapper</artifactId>
+      <version>2.3.8</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <version>4.0.3</version>
     </dependency>
 
     <dependency>
@@ -75,7 +98,7 @@
   <parent>
     <groupId>io.sitoolkit.util.sbrs</groupId>
     <artifactId>sit-util-sbrs</artifactId>
-    <version>0.9</version>
+    <version>1.0.0</version>
   </parent>
 
 

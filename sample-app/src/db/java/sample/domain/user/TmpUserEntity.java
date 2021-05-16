@@ -1,6 +1,6 @@
 package sample.domain.user;
 
-import io.sitoolkit.util.sbrs.AccountEntity;
+import io.sitoolkit.util.sbrs.TmpAccountEntity;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import lombok.AllArgsConstructor;
@@ -13,19 +13,13 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @NoArgsConstructor
-public class UserEntity implements AccountEntity {
+public class TmpUserEntity implements TmpAccountEntity {
 
   @Id private String id;
 
   private String loginId;
 
-  private String password;
-
-  private String name;
-
   private String mailAddress;
 
-  private String roles;
-
-  private String resetId;
+  private String activateCode;
 }

@@ -46,13 +46,19 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.subethamail</groupId>
+      <artifactId>subethasmtp</artifactId>
+      <version>3.1.7</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
 
   <parent>
     <groupId>io.sitoolkit.util.sbrs</groupId>
     <artifactId>sit-util-sbrs</artifactId>
-    <version>0.9</version>
+    <version>1.0.0</version>
   </parent>
 
   <properties>
@@ -101,6 +107,10 @@
             <configuration>
               <resources>
                 <resource>
+                  <directory>src/main/resources</directory>
+                  <filtering>true</filtering>
+                </resource>
+                <resource>
                   <directory>src/${impl}/resources</directory>
                 </resource>
               </resources>
@@ -132,7 +142,12 @@
         <dependency>
           <groupId>com.unboundid</groupId>
           <artifactId>unboundid-ldapsdk</artifactId>
-          <scope>test</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>javax.xml.bind</groupId>
+          <artifactId>jaxb-api</artifactId>
+          <version>2.3.1</version>
         </dependency>
 
       </dependencies>

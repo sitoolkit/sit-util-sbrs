@@ -1,10 +1,9 @@
 package sample.infrastructure.auth;
 
+import io.sitoolkit.util.sbrs.UrlAuthorizationConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.stereotype.Component;
-
-import io.sitoolkit.util.sbrs.UrlAuthorizationConfigurer;
 
 @Component
 public class SampleUrlAuthorizationConfigurer implements UrlAuthorizationConfigurer {
@@ -16,7 +15,7 @@ public class SampleUrlAuthorizationConfigurer implements UrlAuthorizationConfigu
               registory) {
 
     return registory
-        .antMatchers("/auth/**")
+        .antMatchers("/auth/**", "/account/**")
         .permitAll()
         .antMatchers("/admin/**")
         .hasRole("ADMIN")
